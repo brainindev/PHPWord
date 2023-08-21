@@ -40,12 +40,34 @@ class Link extends Text
         $prefix = $this->element->isInternal() ? '#' : '';
         $content = $this->writeOpening();
         if (Settings::isOutputEscapingEnabled()) {
-            $content .= "<a href=\"{$prefix}{$this->escaper->escapeHtmlAttr($this->element->getSource())}\">{$this->escaper->escapeHtml($this->element->getText())}</a>";
+            $content .= "<a href=\"{$prefix}{$this->escaper->escapeHtmlAttr($this->element->getSource())}\" {$this->setFontStyle()}>{$this->escaper->escapeHtml($this->element->getText())}</a>";
         } else {
-            $content .= "<a href=\"{$prefix}{$this->element->getSource()}\">{$this->element->getText()}</a>";
+            $content .= "<a href=\"{$prefix}{$this->element->getSource()}\" {$this->setFontStyle()}>{$this->element->getText()}</a>";
         }
         $content .= $this->writeClosing();
 
         return $content;
+    }
+
+    /**
+     * Set font style.
+     */
+    private function setFontStyle()
+    {
+        $element = $this->element;
+        $style = '';
+        $fontStyle = $element->getFontStyle();
+        $fStyleIsObject = ($fontStyle instanceof Font);
+        if ($fStyleIsObject) {
+            $styleWriter = new FontStyleWriter($fontStyle);
+            $style = $styleWriter->write();
+        } elseif (is_string($fontStyle)) {
+            $style = $fontStyle;
+        }
+        if ($style) {
+            $attribute = $fStyleIsObject ? 'style' : 'class';
+            return " {$attribute}=\"{$style}\" ";
+        }
+        return "";
     }
 }
